@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
 @Service
@@ -27,11 +26,23 @@ public class CustomerRegistrationServiceImpl implements CustomerRegistrationServ
     private MerchantRepository merchantRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     @Override
-    public ResponseEntity<BaseResponse<Object>> registerNewUser(UserRequest userRequest) {
+    public ResponseEntity<BaseResponse<Object>> registerNewUser(UserRequest userRequest, String token) {
         try {
             switch (userRequest.getRole()) {
+                case ADMIN, MERCHANT -> {
+                    Optional<MerchantInfo> optionalCustomerInfo = merchantRepository.findByEmail(userRequest.getEmail());
+                    return optionalCustomerInfo.map(data -> ResponseEntity.ok(responseMessage.setFailureResponse("User Already exist")))
+                            .orElseGet(() -> {
+                                userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+                                MerchantInfo customerInfo = mapper.convertValue(userRequest, MerchantInfo.class);
+                                customerInfo.setAdmin(jwtTokenUtil.getRoleFromToken(token).equals("SUPER_ADMIN"));
+                                return ResponseEntity.ok(responseMessage.setSuccessResponse("User Registered", mapper.convertValue(merchantRepository.save(customerInfo), MerchantResponse.class)));
+                            });
+                }
                 case CUSTOMER -> {
                     Optional<CustomerInfo> optionalCustomerInfo = customerRepository.findByEmail(userRequest.getEmail());
                     return optionalCustomerInfo.map(data -> ResponseEntity.ok(responseMessage.setFailureResponse("User Already exist")))
@@ -39,15 +50,6 @@ public class CustomerRegistrationServiceImpl implements CustomerRegistrationServ
                                 userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
                                 CustomerInfo customerInfo = mapper.convertValue(userRequest, CustomerInfo.class);
                                 return ResponseEntity.ok(responseMessage.setSuccessResponse("User Registered", mapper.convertValue(customerRepository.save(customerInfo), CustomerResponse.class)));
-                            });
-                }
-                case MERCHANT -> {
-                    Optional<MerchantInfo> optionalCustomerInfo = merchantRepository.findByEmail(userRequest.getEmail());
-                    return optionalCustomerInfo.map(data -> ResponseEntity.ok(responseMessage.setFailureResponse("User Already exist")))
-                            .orElseGet(() -> {
-                                userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-                                MerchantInfo customerInfo = mapper.convertValue(userRequest, MerchantInfo.class);
-                                return ResponseEntity.ok(responseMessage.setSuccessResponse("User Registered", mapper.convertValue(merchantRepository.save(customerInfo), MerchantResponse.class)));
                             });
                 }
                 default -> {

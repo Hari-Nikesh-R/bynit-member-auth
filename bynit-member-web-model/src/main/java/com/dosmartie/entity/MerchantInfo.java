@@ -23,8 +23,7 @@ public class MerchantInfo implements CredentialProvider {
     private String phoneNumber;
     private String role;
     private boolean isVerified;
-
-
+    private boolean isAdmin;
     @ManyToOne
     @JoinColumn(name = "company_address_id")
     private Address companyAddress;
