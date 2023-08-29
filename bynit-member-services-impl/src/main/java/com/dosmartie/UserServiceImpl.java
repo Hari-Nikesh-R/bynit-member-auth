@@ -1,6 +1,6 @@
 package com.dosmartie;
 
-import com.dosmartie.entity.JwtTokenManager;
+import com.dosmartie.authconfig.JwtTokenUtil;
 import com.dosmartie.helper.ResponseMessage;
 import com.dosmartie.request.AuthRequest;
 import com.dosmartie.response.AuthResponse;
@@ -8,6 +8,7 @@ import com.dosmartie.response.BaseResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.impl.DefaultClaims;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -20,10 +21,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     @Autowired
     private AuthenticationProvider authenticationProvider;
@@ -50,8 +50,8 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.ok(responseMessage.setSuccessResponse("Authenticated", new AuthResponse(token)));
         }
         catch (Exception exception) {
-            exception.printStackTrace();
-            return ResponseEntity.ok(responseMessage.setFailureResponse("Not Authenticated", exception));
+            log.error("Invalid user credential");
+            return ResponseEntity.ok(responseMessage.setUnauthorizedResponse("Not Authenticated", exception));
         }
     }
 

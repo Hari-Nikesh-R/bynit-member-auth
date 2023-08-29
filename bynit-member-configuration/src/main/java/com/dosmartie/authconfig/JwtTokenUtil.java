@@ -1,5 +1,6 @@
-package com.dosmartie;
+package com.dosmartie.authconfig;
 
+import com.dosmartie.JwtTokenManagerRepository;
 import com.dosmartie.entity.JwtTokenManager;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.dosmartie;
+package com.dosmartie.authconfig;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

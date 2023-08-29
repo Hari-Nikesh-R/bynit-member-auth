@@ -1,5 +1,8 @@
-package com.dosmartie;
+package com.dosmartie.authconfig;
 
+import com.dosmartie.CustomerRepository;
+import com.dosmartie.MerchantNotVerifiedException;
+import com.dosmartie.MerchantRepository;
 import com.dosmartie.common.Roles;
 import com.dosmartie.entity.CustomerInfo;
 import com.dosmartie.entity.MerchantInfo;

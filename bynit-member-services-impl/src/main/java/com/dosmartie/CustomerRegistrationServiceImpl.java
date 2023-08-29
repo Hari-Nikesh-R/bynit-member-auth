@@ -1,5 +1,6 @@
 package com.dosmartie;
 
+import com.dosmartie.authconfig.JwtTokenUtil;
 import com.dosmartie.request.UserRequest;
 import com.dosmartie.entity.CustomerInfo;
 import com.dosmartie.entity.MerchantInfo;
@@ -39,7 +40,12 @@ public class CustomerRegistrationServiceImpl implements CustomerRegistrationServ
                             .orElseGet(() -> {
                                 userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
                                 MerchantInfo customerInfo = mapper.convertValue(userRequest, MerchantInfo.class);
-                                customerInfo.setAdmin(jwtTokenUtil.getRoleFromToken(token).equals("SUPER_ADMIN"));
+                                if (!token.isEmpty()) {
+                                    customerInfo.setAdmin(jwtTokenUtil.getRoleFromToken(token).equals("SUPER_ADMIN"));
+                                }
+                                else {
+                                    customerInfo.setAdmin(false);
+                                }
                                 return ResponseEntity.ok(responseMessage.setSuccessResponse("User Registered", mapper.convertValue(merchantRepository.save(customerInfo), MerchantResponse.class)));
                             });
                 }

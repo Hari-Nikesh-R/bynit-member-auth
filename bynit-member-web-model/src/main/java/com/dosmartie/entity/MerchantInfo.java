@@ -27,5 +27,7 @@ public class MerchantInfo implements CredentialProvider {
     @ManyToOne
     @JoinColumn(name = "company_address_id")
     private Address companyAddress;
-    private String companyName;
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 }

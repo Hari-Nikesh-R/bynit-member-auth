@@ -1,28 +1,17 @@
 package com.dosmartie.controller.auth;
 
 import com.dosmartie.CustomerRegistrationService;
-import com.dosmartie.JwtTokenUtil;
 import com.dosmartie.UserService;
 import com.dosmartie.request.AuthRequest;
+import com.dosmartie.request.CustomerRequest;
+import com.dosmartie.request.MerchantRequest;
 import com.dosmartie.request.UserRequest;
 import com.dosmartie.response.AuthResponse;
 import com.dosmartie.response.BaseResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.impl.DefaultClaims;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/oauth")
@@ -39,8 +28,13 @@ public class AuthController {
         return userService.signInUser(authRequest);
     }
 
-    @PostMapping(value = "/register")
-    public ResponseEntity<BaseResponse<Object>> registerUser(@RequestBody UserRequest userInfoDto) {
+    @PostMapping(value = "/register/user")
+    public ResponseEntity<BaseResponse<Object>> registerUser(@RequestBody CustomerRequest userInfoDto) {
+        return userRegisterService.registerNewUser(userInfoDto,"");
+    }
+
+    @PostMapping(value = "/register/merchant")
+    public ResponseEntity<BaseResponse<Object>> registerUser(@RequestBody MerchantRequest userInfoDto) {
         return userRegisterService.registerNewUser(userInfoDto,"");
     }
 
