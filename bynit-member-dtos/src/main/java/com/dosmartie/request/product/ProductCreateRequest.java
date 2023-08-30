@@ -24,6 +24,7 @@ public class ProductCreateRequest {
     @NotNull(message = "Price must not be null")
     @Positive(message = "Price cannot be negative")
     private Double price;
+    private String sku;
     private List<String> images;
     @NotNull(message = "Quantity must not be null")
     @Positive(message = "Quantity must not be negative or zero")

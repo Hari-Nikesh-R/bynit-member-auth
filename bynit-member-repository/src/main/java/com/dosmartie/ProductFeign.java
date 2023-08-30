@@ -43,4 +43,7 @@ public interface ProductFeign {
 
     @PostMapping(value = ProductUrls.QUANTITY)
     public ProductQuantityCheckResponse[] quantityCheck(@RequestBody List<CartProductRequest> productRequest);
+
+    @PostMapping(value = ProductUrls.STOCK)
+    public ResponseEntity<BaseResponse<String>> updateStock(@RequestBody CartProductRequest cartProductRequest, @RequestHeader(AUTH_ID) String authId);
 }

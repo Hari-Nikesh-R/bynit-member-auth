@@ -1,23 +1,30 @@
 package com.dosmartie.controller.product;
 
 
-
 import com.dosmartie.ProductFeign;
 import com.dosmartie.authconfig.JwtTokenUtil;
 import com.dosmartie.helper.PropertiesCollector;
+import com.dosmartie.helper.Urls;
 import com.dosmartie.helper.feignurls.ProductUrls;
+import com.dosmartie.request.product.CartProductRequest;
 import com.dosmartie.request.product.ProductCreateRequest;
 import com.dosmartie.response.BaseResponse;
 import com.dosmartie.response.product.ProductResponse;
 import jakarta.validation.Valid;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static com.dosmartie.helper.Constants.AUTH_ID;
 import static com.dosmartie.helper.product.Constants.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -55,7 +62,7 @@ public class ProductController {
     @PreAuthorize("hasAuthority('MERCHANT')")
     @DeleteMapping(value = "/variant")
     public ResponseEntity<BaseResponse<String>> deleteProductVariant(@RequestHeader(AUTHORIZATION) String token, @RequestParam(VARIANT_SKU) String itemSku) {
-        return productFeign.deleteProductVariant(itemSku, propertiesCollector.getAuthId(), jwtTokenUtil.getUsernameFromToken(token.substring(7)));
+        return productFeign.deleteProductVariant(itemSku,propertiesCollector.getAuthId(), jwtTokenUtil.getUsernameFromToken(token.substring(7)));
     }
 
     @PreAuthorize("hasAuthority('MERCHANT')")
@@ -75,8 +82,13 @@ public class ProductController {
     public BaseResponse<List<ProductResponse>> getAllProducts(@RequestHeader(AUTHORIZATION) String token, @RequestParam(PAGE) int page, @RequestParam(SIZE) int size) {
         return productFeign.getAllProducts(page, size, getMerchantEmail(token), propertiesCollector.getAuthId());
     }
+    @PreAuthorize("hasAuthority('MERCHANT')")
+    @PostMapping(value =ProductUrls.STOCK)
+    public ResponseEntity<BaseResponse<String>> updateStock(@RequestBody CartProductRequest cartProductRequest) {
+        return productFeign.updateStock(cartProductRequest, propertiesCollector.getAuthId());
+    }
 
-    private String getMerchantEmail(String token){
+    private String getMerchantEmail(String token) {
         if (jwtTokenUtil.getRoleFromToken(token.substring(7)).equalsIgnoreCase("MERCHANT")) {
             return jwtTokenUtil.getUsernameFromToken(token.substring(7));
         }

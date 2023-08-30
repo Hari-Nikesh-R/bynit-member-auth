@@ -4,6 +4,9 @@ import com.dosmartie.authconfig.JwtTokenUtil;
 import com.dosmartie.entity.CustomerInfo;
 import com.dosmartie.entity.MerchantInfo;
 import com.dosmartie.helper.ResponseMessage;
+import com.dosmartie.response.CustomerResponse;
+import com.dosmartie.response.MerchantResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,20 +20,22 @@ public class MemberServiceImpl implements MemberService{
     private final CustomerRepository customerRepository;
     private final MerchantRepository merchantRepository;
     private final ResponseMessage<Object> responseMessage;
+    private final ObjectMapper mapper;
 
     @Autowired
-    public MemberServiceImpl(JwtTokenUtil jwtTokenUtil, CustomerRepository customerRepository, MerchantRepository merchantRepository, ResponseMessage<Object> responseMessage) {
+    public MemberServiceImpl(JwtTokenUtil jwtTokenUtil, CustomerRepository customerRepository, MerchantRepository merchantRepository, ResponseMessage<Object> responseMessage, ObjectMapper mapper) {
         this.jwtTokenUtil = jwtTokenUtil;
         this.customerRepository = customerRepository;
         this.merchantRepository = merchantRepository;
         this.responseMessage = responseMessage;
+        this.mapper = mapper;
     }
 
     @Override
     public ResponseEntity<?> getCustomerProfileInfo(String token) {
         try {
             return getCustomerByEmail(jwtTokenUtil.getUsernameFromToken(token))
-                    .map(customerInfo -> ResponseEntity.ok(responseMessage.setSuccessResponse("Fetched user", customerInfo)))
+                    .map(customerInfo -> ResponseEntity.ok(responseMessage.setSuccessResponse("Fetched user", mapper.convertValue(customerInfo, CustomerResponse.class))))
                     .orElseGet(() -> ResponseEntity.ok(responseMessage.setFailureResponse("User not found/Invalid token")));
         }
         catch (Exception exception) {
@@ -41,7 +46,7 @@ public class MemberServiceImpl implements MemberService{
     public ResponseEntity<?> getMerchantProfileInfo(String token) {
         try {
             return getMerchantByEmail(jwtTokenUtil.getUsernameFromToken(token))
-                    .map(merchantInfo -> ResponseEntity.ok(responseMessage.setSuccessResponse("Fetched user", merchantInfo)))
+                    .map(merchantInfo -> ResponseEntity.ok(responseMessage.setSuccessResponse("Fetched user", mapper.convertValue(merchantInfo, MerchantResponse.class))))
                     .orElseGet(() -> ResponseEntity.ok(responseMessage.setFailureResponse("User not found/Invalid token")));
         }
         catch (Exception exception) {

@@ -48,15 +48,12 @@ public class UserInfoUserDetailsService implements UserDetailsService {
             AuthRequest authRequest = getAuthRequest(request);
             switch (authRequest.getRole()) {
                 case CUSTOMER -> {
-                    log.info("Get User");
                     return fetchUser(authRequest);
                 }
                 case MERCHANT, ADMIN -> {
-                    log.info("Get Merchant or Admin");
                     return fetchMerchant(authRequest);
                 }
                 case SUPER_ADMIN -> {
-                    log.info("Get Super Admin");
                     return fetchAdmin(authRequest);
                 }
             }

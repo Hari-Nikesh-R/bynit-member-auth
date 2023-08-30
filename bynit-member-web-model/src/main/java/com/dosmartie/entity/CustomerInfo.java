@@ -24,5 +24,5 @@ public class CustomerInfo implements CredentialProvider {
     private String name;
     private String phoneNumber;
     private String role;
-//    private ArrayList<Address> homeAddress;
+    //private ArrayList<Address> homeAddress;
 }

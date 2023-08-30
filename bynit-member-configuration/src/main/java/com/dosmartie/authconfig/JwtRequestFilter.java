@@ -1,5 +1,6 @@
 package com.dosmartie.authconfig;
 
+import com.dosmartie.TokenExpiredException;
 import com.dosmartie.helper.Utility;
 import com.dosmartie.request.AuthRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +34,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private UserInfoUserDetailsService jwtUserDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException , TokenExpiredException{
         String requestTokenHeader = request.getHeader(AUTHORIZATION);
         String username = null;
         String jwtToken = null;
@@ -54,7 +55,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     allowForRefreshToken(e, request);
                 } else
                     request.setAttribute("exception", e);
-                 System.out.println("JWT Token has expired");
+                 logger.error("JWT token expired");
             }
         } else {
             logger.warn("JWT Token does not begin with Bearer String");
