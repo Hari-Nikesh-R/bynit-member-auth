@@ -1,12 +1,16 @@
-package com.dosmartie;
+package com.dosmartie.authconfig;
 
+import com.dosmartie.JwtTokenManagerRepository;
+import com.dosmartie.TokenExpiredException;
+import com.dosmartie.helper.Utility;
+import com.dosmartie.request.AuthRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,28 +21,37 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
 @Component
 @Configuration
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
-    JwtTokenUtil jwtTokenUtil;
+    private JwtTokenUtil jwtTokenUtil;
     @Autowired
-    UserInfoUserDetailsService jwtUserDetailsService;
+    private ObjectMapper objectMapper;
+    @Autowired
+    private UserInfoUserDetailsService jwtUserDetailsService;
+
+    @Autowired
+    private JwtTokenManagerRepository jwtTokenManagerRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String requestTokenHeader = request.getHeader("Authorization");
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException , TokenExpiredException{
+        String requestTokenHeader = request.getHeader(AUTHORIZATION);
         String username = null;
         String jwtToken = null;
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
             try {
-                username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                AuthRequest authRequest = new AuthRequest();
+                authRequest.setEmail(jwtTokenUtil.getUsernameFromToken(jwtToken));
+                authRequest.setRole(Utility.roleConvertor(jwtTokenUtil.getRoleFromToken(jwtToken)));
+                username = objectMapper.writeValueAsString(authRequest);
             } catch (IllegalArgumentException e) {
                 System.out.println("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {
-
                 String isRefreshToken = request.getHeader("isRefreshToken");
                 String requestURL = request.getRequestURL().toString();
                 // allow for Refresh Token creation if following conditions are true.
@@ -46,21 +59,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     allowForRefreshToken(e, request);
                 } else
                     request.setAttribute("exception", e);
-                 System.out.println("JWT Token has expired");
+                 logger.error("JWT token expired");
             }
         } else {
             logger.warn("JWT Token does not begin with Bearer String");
         }
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
             UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             }
         }
         filterChain.doFilter(request, response);

@@ -14,6 +14,10 @@ public class ResponseMessage<T> {
         return new BaseResponse<>(result, exception.getMessage(), false, HttpStatus.INTERNAL_SERVER_ERROR.value(), null);
     }
 
+    public synchronized BaseResponse<T> setUnauthorizedResponse(String result, Exception exception) {
+        return new BaseResponse<>(result, exception.getMessage(), false, HttpStatus.FORBIDDEN.value(), null);
+    }
+
     public synchronized BaseResponse<T> setFailureResponse(String errorDesc) {
         return new BaseResponse<>(null, errorDesc, false, HttpStatus.BAD_REQUEST.value(), null);
     }

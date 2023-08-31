@@ -24,5 +24,7 @@ public class CustomerInfo implements CredentialProvider {
     private String name;
     private String phoneNumber;
     private String role;
-//    private ArrayList<Address> homeAddress;
+    @ManyToOne
+    @JoinColumn(name = "home_address_id")
+    private Address address;
 }

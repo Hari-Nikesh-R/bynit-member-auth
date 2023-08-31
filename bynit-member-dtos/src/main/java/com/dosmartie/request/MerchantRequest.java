@@ -7,5 +7,5 @@ import lombok.Data;
 @Data
 public class MerchantRequest extends UserRequest {
     private AddressResponse companyAddress;
-    private String companyName;
+    private CompanyRequest companyName;
 }

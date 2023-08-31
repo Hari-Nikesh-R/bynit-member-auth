@@ -1,6 +1,9 @@
-package com.dosmartie;
+package com.dosmartie.authconfig;
 
+import com.dosmartie.JwtTokenManagerRepository;
+import com.dosmartie.entity.JwtTokenManager;
 import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +14,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 
@@ -36,9 +40,16 @@ public class JwtTokenUtil implements Serializable {
         this.refreshExpirationDateInMs = refreshExpirationDateInMs;
     }
 
+    @Autowired
+    private JwtTokenManagerRepository jwtTokenManagerRepository;
+
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
+    }
+
+    public String getRoleFromToken(String token) {
+        return getClaimFromToken(token, claims -> claims.get("role")).toString();
     }
 
     //retrieve expiration date from jwt token
@@ -58,7 +69,7 @@ public class JwtTokenUtil implements Serializable {
     }
 
     //check if the token has expired
-    private Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }
@@ -66,7 +77,7 @@ public class JwtTokenUtil implements Serializable {
     //generate token for user
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        userDetails.getAuthorities().forEach(user -> claims.put("profile", user.getAuthority()));
+        userDetails.getAuthorities().forEach(user -> claims.put("role", user.getAuthority()));
         return doGenerateToken(claims, userDetails.getUsername());
     }
 

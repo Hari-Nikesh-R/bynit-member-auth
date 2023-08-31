@@ -1,4 +1,4 @@
-package com.dosmartie;
+package com.dosmartie.authconfig;
 
 import com.dosmartie.entity.CustomerInfo;
 import com.dosmartie.entity.MerchantInfo;
