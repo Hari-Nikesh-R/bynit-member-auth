@@ -1,6 +1,7 @@
 package com.dosmartie.controller.auth;
 
 import com.dosmartie.MemberService;
+import com.dosmartie.authconfig.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,8 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 public class MemberController {
     @Autowired
     private MemberService memberService;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
 
     @GetMapping(value = "/user")
@@ -27,8 +30,8 @@ public class MemberController {
     }
 
     @GetMapping(value = "/company")
-    public ResponseEntity<?> getCompanyDetail(@RequestHeader(EMAIL) String email) {
-        return memberService.getMerchantProfileInfo(email);
+    public ResponseEntity<?> getCompanyDetail(@RequestHeader(AUTHORIZATION) String token) {
+        return memberService.getMerchantProfileInfo(jwtTokenUtil.getUsernameFromToken(token.substring(7)));
     }
 
 }

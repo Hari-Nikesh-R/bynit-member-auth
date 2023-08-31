@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface MerchantRepository extends JpaRepository<MerchantInfo, Integer> {
     Optional<MerchantInfo> findByEmail(String email);
-    @Query(value = "select * from merchant_info where is_verified = false", nativeQuery = true)
+    @Query(value = "select * from merchant_info where is_verified = false and role = 'MERCHANT'", nativeQuery = true)
     List<MerchantInfo> findByNonVerified();
 }

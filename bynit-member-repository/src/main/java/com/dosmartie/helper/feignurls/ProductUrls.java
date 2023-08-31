@@ -13,5 +13,6 @@ public final class ProductUrls {
     public static final String PURCHASE = "/purchase";
     public static final String STOCK = "/stock";
     public static final String QUANTITY = "/quantity";
+    public static final String RATE = "/rate";
     public static final String DEDUCT_STOCK = "/deductStock";
 }

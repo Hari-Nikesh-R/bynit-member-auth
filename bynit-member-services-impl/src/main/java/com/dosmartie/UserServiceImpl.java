@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<BaseResponse<AuthResponse>> getRefreshToken(HttpServletRequest request) {
         try {
-            DefaultClaims claims = (io.jsonwebtoken.impl.DefaultClaims) request.getAttribute("claims");
+            DefaultClaims claims = (io.jsonwebtoken.impl.DefaultClaims) request.getAttribute("role");
             Map<String, Object> expectedMap = getMapFromIoJsonwebtokenClaims(claims);
             String token = jwtTokenUtil.doGenerateRefreshToken(expectedMap, expectedMap.get("sub").toString());
 

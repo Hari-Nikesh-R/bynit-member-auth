@@ -7,7 +7,6 @@ import lombok.Data;
 
 @Data
 public class MerchantResponse extends UserResponse {
-    private AddressResponse companyAddress;
+    private AddressResponse address;
     private CompanyResponse companyName;
-
 }

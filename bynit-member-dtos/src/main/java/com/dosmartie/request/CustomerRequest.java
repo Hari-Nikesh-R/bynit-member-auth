@@ -7,5 +7,5 @@ import java.util.List;
 
 @Data
 public class CustomerRequest extends UserRequest {
-    private List<AddressResponse> addressResponse;
+    private AddressResponse addressResponse;
 }

@@ -20,7 +20,7 @@ import static com.dosmartie.helper.product.Constants.MERCHANT;
 public interface CartFeign {
 
     @PostMapping(value = CartUrls.ORDER)
-    public ResponseEntity<?> placeOrder(@RequestBody @Valid CartOrderRequest orderRequest, @RequestHeader(AUTH_ID) String authId);
+    public ResponseEntity<?> placeOrder(@RequestBody CartOrderRequest orderRequest, @RequestHeader(AUTH_ID) String authId);
     @PostMapping(value = CartUrls.CART + CartUrls.ADD_PRODUCTS)
     public ResponseEntity<?> addToCart(@Valid @RequestBody CartRequest cartRequest, @RequestHeader(AUTH_ID) String authId);
 

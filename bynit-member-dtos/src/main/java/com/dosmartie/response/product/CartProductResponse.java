@@ -19,4 +19,6 @@ public class CartProductResponse implements Serializable {
     private Integer quantity;
     private String brand;
     private String category;
+    private boolean isRated;
+    private double ratingBasedOnOrder;
 }

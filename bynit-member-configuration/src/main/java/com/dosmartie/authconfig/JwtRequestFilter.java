@@ -1,5 +1,6 @@
 package com.dosmartie.authconfig;
 
+import com.dosmartie.JwtTokenManagerRepository;
 import com.dosmartie.TokenExpiredException;
 import com.dosmartie.helper.Utility;
 import com.dosmartie.request.AuthRequest;
@@ -32,6 +33,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private ObjectMapper objectMapper;
     @Autowired
     private UserInfoUserDetailsService jwtUserDetailsService;
+
+    @Autowired
+    private JwtTokenManagerRepository jwtTokenManagerRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException , TokenExpiredException{
@@ -67,7 +71,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         userDetails, null, userDetails.getAuthorities());
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             }
         }
         filterChain.doFilter(request, response);

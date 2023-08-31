@@ -26,7 +26,7 @@ public class MerchantInfo implements CredentialProvider {
     private boolean isAdmin;
     @ManyToOne
     @JoinColumn(name = "company_address_id")
-    private Address companyAddress;
+    private Address address;
     @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;

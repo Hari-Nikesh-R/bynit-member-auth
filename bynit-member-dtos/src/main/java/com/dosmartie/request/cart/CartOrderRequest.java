@@ -1,6 +1,7 @@
 package com.dosmartie.request.cart;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
