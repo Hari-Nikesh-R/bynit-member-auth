@@ -5,7 +5,6 @@ import com.dosmartie.UserService;
 import com.dosmartie.request.AuthRequest;
 import com.dosmartie.request.CustomerRequest;
 import com.dosmartie.request.MerchantRequest;
-import com.dosmartie.request.UserRequest;
 import com.dosmartie.response.AuthResponse;
 import com.dosmartie.response.BaseResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,14 +27,19 @@ public class AuthController {
         return userService.signInUser(authRequest);
     }
 
+//    @PostMapping(value = "/logout")
+//    public ResponseEntity<BaseResponse<AuthResponse>> logout(@RequestHeader(AUTHORIZATION) String token) {
+//        return userService.logout(token);
+//    }
+
     @PostMapping(value = "/register/user")
     public ResponseEntity<BaseResponse<Object>> registerUser(@RequestBody CustomerRequest userInfoDto) {
-        return userRegisterService.registerNewUser(userInfoDto,"");
+        return userRegisterService.registerNewUser(userInfoDto, "");
     }
 
     @PostMapping(value = "/register/merchant")
     public ResponseEntity<BaseResponse<Object>> registerUser(@RequestBody MerchantRequest userInfoDto) {
-        return userRegisterService.registerNewUser(userInfoDto,"");
+        return userRegisterService.registerNewUser(userInfoDto, "");
     }
 
     @GetMapping(value = "/refresh-token")

@@ -6,6 +6,7 @@ import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,9 @@ public class JwtTokenUtil implements Serializable {
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
     private int refreshExpirationDateInMs;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -63,9 +67,9 @@ public class JwtTokenUtil implements Serializable {
     }
 
     //for retrieveing any information from token we will need the secret key
-    private Claims getAllClaimsFromToken(String token) {
+    private Claims  getAllClaimsFromToken(String token) {
         token = token.replace("Bearer ","");
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(redisTemplate.opsForValue().get(token)).getBody();
     }
 
     //check if the token has expired

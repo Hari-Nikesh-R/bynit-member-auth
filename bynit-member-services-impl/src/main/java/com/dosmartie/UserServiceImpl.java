@@ -1,6 +1,7 @@
 package com.dosmartie;
 
 import com.dosmartie.authconfig.JwtTokenUtil;
+import com.dosmartie.entity.JwtTokenManager;
 import com.dosmartie.helper.ResponseMessage;
 import com.dosmartie.request.AuthRequest;
 import com.dosmartie.response.AuthResponse;
@@ -10,6 +11,7 @@ import io.jsonwebtoken.impl.DefaultClaims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,24 +21,38 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
-    @Autowired
-    private AuthenticationProvider authenticationProvider;
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-    @Autowired
-    private UserDetailsService userDetailsService;
-    @Autowired
-    private JwtTokenManagerRepository jwtTokenManagerRepository;
-    @Autowired
-    private ResponseMessage<AuthResponse> responseMessage;
-    @Autowired
-    private ObjectMapper mapper;
+
+    private final AuthenticationProvider authenticationProvider;
+
+    private final JwtTokenUtil jwtTokenUtil;
+
+    private final UserDetailsService userDetailsService;
+
+    private final JwtTokenManagerRepository jwtTokenManagerRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    private final ResponseMessage<AuthResponse> responseMessage;
+
+    private final ObjectMapper mapper;
+
+    public UserServiceImpl(AuthenticationProvider authenticationProvider, JwtTokenUtil jwtTokenUtil, UserDetailsService userDetailsService, JwtTokenManagerRepository jwtTokenManagerRepository, RedisTemplate<String, String> redisTemplate, ResponseMessage<AuthResponse> responseMessage, ObjectMapper mapper) {
+        this.authenticationProvider = authenticationProvider;
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.userDetailsService = userDetailsService;
+        this.jwtTokenManagerRepository = jwtTokenManagerRepository;
+        this.redisTemplate = redisTemplate;
+        this.responseMessage = responseMessage;
+        this.mapper = mapper;
+    }
 
     @Override
     public ResponseEntity<BaseResponse<AuthResponse>> signInUser(AuthRequest authRequest) {
@@ -46,8 +62,10 @@ public class UserServiceImpl implements UserService {
             System.out.println(auth);
             final UserDetails userDetails = userDetailsService
                     .loadUserByUsername(auth);
-            final String token = jwtTokenUtil.generateToken(userDetails);
-            return ResponseEntity.ok(responseMessage.setSuccessResponse("Authenticated", new AuthResponse(token)));
+            String uuid = generateUUID();
+            redisTemplate.opsForValue().set(uuid, jwtTokenUtil.generateToken(userDetails));
+            redisTemplate.expire(uuid, 1, TimeUnit.DAYS);
+            return ResponseEntity.ok(responseMessage.setSuccessResponse("Authenticated", new AuthResponse(uuid)));
         }
         catch (Exception exception) {
             log.error("Invalid user credential");
@@ -55,10 +73,20 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+//    @Override
+//    public ResponseEntity<BaseResponse<AuthResponse>> logout(String token) {
+//        try {
+//
+//        }
+//        catch (Exception exception) {
+//            return ResponseEntity.ok(responseMessage.setFailureResponse("Invalid token", exception));
+//        }
+//    }
+
     @Override
     public ResponseEntity<BaseResponse<AuthResponse>> getRefreshToken(HttpServletRequest request) {
         try {
-            DefaultClaims claims = (io.jsonwebtoken.impl.DefaultClaims) request.getAttribute("role");
+            DefaultClaims claims = (io.jsonwebtoken.impl.DefaultClaims) request.getAttribute("claims");
             Map<String, Object> expectedMap = getMapFromIoJsonwebtokenClaims(claims);
             String token = jwtTokenUtil.doGenerateRefreshToken(expectedMap, expectedMap.get("sub").toString());
 
@@ -68,6 +96,23 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.ok(responseMessage.setFailureResponse("Unable to fetch token code", exception));
 
         }
+    }
+
+    private String generateUUID() {
+        String characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        final int[] LENGTHS = { 8, 4, 4, 4, 12 };
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        sb.append("AT-");
+        for (int length : LENGTHS) {
+            for (int i = 0; i < length; i++) {
+                sb.append(characters.charAt(random.nextInt(characters.length())));
+            }
+            sb.append("-");
+        }
+        sb.setLength(sb.length() - 1);
+
+        return sb.toString();
     }
 
     public Map<String, Object> getMapFromIoJsonwebtokenClaims(DefaultClaims claims) {

@@ -1,6 +1,7 @@
 package com.dosmartie.response.order;
 
 import com.dosmartie.request.cart.CustomerDetailRequest;
+import com.dosmartie.response.product.CartProductResponse;
 import com.dosmartie.response.product.ProductResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ public class OrderResponse {
     private CustomerDetailRequest orderedCustomerDetail;
     private OrderStatus orderStatus;
     private String orderId;
-    private List<ProductResponse> availableProduct;
+    private List<CartProductResponse> availableProduct;
     private String errorDesc;
 
     public OrderResponse(String errorDesc) {

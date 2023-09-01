@@ -10,14 +10,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-import static com.dosmartie.helper.feignconstants.OrderConstants.PARAM;
+import static com.dosmartie.helper.feignconstants.OrderConstants.EMAIL;
+import static com.dosmartie.helper.feignurls.OrderUrls.ADMIN_ALL;
 import static com.dosmartie.helper.feignurls.OrderUrls.ALL;
 import static com.dosmartie.helper.product.Constants.AUTH_ID;
 
-@FeignClient(url = "http://localhost:8085/order", value = "orderFeign")
+@FeignClient(url = "http://localhost:8045/order", value = "orderFeign")
 public interface OrderFeign {
-    @GetMapping
-    public ResponseEntity<BaseResponse<OrderResponse>> getProductByEmail(@RequestParam(value = PARAM) String param, @RequestHeader(AUTH_ID) String authId);
     @GetMapping(value = ALL)
+    public ResponseEntity<BaseResponse<List<OrderResponse>>> getProductByEmail(@RequestParam(value = EMAIL) String param, @RequestHeader(AUTH_ID) String authId);
+    @GetMapping
+    public ResponseEntity<BaseResponse<OrderResponse>> getOrder(@RequestHeader("orderId") String orderId,  @RequestHeader("email") String email, @RequestHeader(AUTH_ID) String authId);
+    @GetMapping(value = ADMIN_ALL)
     public ResponseEntity<BaseResponse<List<OrderResponse>>> getAllOrder(@RequestHeader(AUTH_ID) String authId);
 }

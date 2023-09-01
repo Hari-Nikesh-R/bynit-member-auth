@@ -55,7 +55,7 @@ public class WebConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
           httpSecurity.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth ->
                         auth.requestMatchers("/oauth/**","/swagger-resources/**","/swagger-ui/**","/v3/api-docs/**", "/product/quantity").permitAll()
-                                .requestMatchers("/admin/**", "/product/**", "/cart/**", "/member/**").authenticated())
+                                .requestMatchers("/admin/**", "/product/**", "/cart/**", "/member/**","/order/**").authenticated())
                 .exceptionHandling(httpSecurityExceptionHandlingConfigurer ->
                         httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(jwtAuthenticationEntryPoint)).sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

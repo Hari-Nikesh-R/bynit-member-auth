@@ -44,7 +44,7 @@ public interface ProductFeign {
     ResponseEntity<BaseResponse<String>> updateStock(@RequestBody CartProductRequest cartProductRequest, @RequestHeader(AUTH_ID) String authId);
 
     @PutMapping(value = ProductUrls.PURCHASE + ProductUrls.RATE)
-    ResponseEntity<BaseResponse<?>> rateProduct(@RequestBody @Valid OrderRatingRequest orderRatingRequest, @RequestHeader(AUTH_ID) String authId);
+    ResponseEntity<BaseResponse<?>> rateProduct(@RequestBody @Valid OrderRatingRequest orderRatingRequest, @RequestHeader(AUTH_ID) String authId, @RequestHeader("email") String email);
     @GetMapping(value = ProductUrls.PURCHASE + ProductUrls.RATE)
-    public ResponseEntity<BaseResponse<?>> fetchUnratedProductsFromAnOrder(@RequestHeader(AUTH_ID) String authId, @RequestParam("orderId") String orderId);
+    public ResponseEntity<BaseResponse<?>> fetchUnratedProductsFromAnOrder(@RequestHeader(AUTH_ID) String authId, @RequestParam("orderId") String orderId, @RequestHeader("email") String email);
 }
