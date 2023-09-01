@@ -2,6 +2,7 @@ package com.dosmartie.controller;
 
 import com.dosmartie.TokenExpiredException;
 import com.dosmartie.response.BaseResponse;
+import feign.FeignException;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -29,10 +30,17 @@ public class ExceptionHandlerController {
         return new BaseResponse<>("Invalid request", errorMessage.get() , false, HttpStatus.BAD_REQUEST.value(), null);
     }
 
+    @ExceptionHandler(FeignException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public BaseResponse<Object> handleFeignException() {
+        return new BaseResponse<>("Invalid request", "Internal Network gateway exception", false, HttpStatus.BAD_REQUEST.value(), null);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public BaseResponse<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException exception) throws IOException {
+    public BaseResponse<Object> handleHttpMessageNotReadable() throws IOException {
         return new BaseResponse<>(null, "Invalid request", false, HttpStatus.BAD_REQUEST.value(), null);
     }
 

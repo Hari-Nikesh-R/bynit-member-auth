@@ -85,14 +85,14 @@ public class ProductController {
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @PutMapping(value = ProductUrls.RATE)
-    public ResponseEntity<BaseResponse<?>> rateProduct(@RequestBody @Valid OrderRatingRequest orderRatingRequest) {
-        return productFeign.rateProduct(orderRatingRequest, propertiesCollector.getAuthId());
+    public ResponseEntity<BaseResponse<?>> rateProduct(@RequestHeader(AUTHORIZATION) String token, @RequestBody @Valid OrderRatingRequest orderRatingRequest) {
+        return productFeign.rateProduct(orderRatingRequest, propertiesCollector.getAuthId(), jwtTokenUtil.getUsernameFromToken(token));
     }
 
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @GetMapping(value = ProductUrls.RATE)
-    public ResponseEntity<BaseResponse<?>> getUnratedProducts(@RequestParam("orderId") String orderId) {
-        return productFeign.fetchUnratedProductsFromAnOrder(propertiesCollector.getAuthId(), orderId);
+    public ResponseEntity<BaseResponse<?>> getUnratedProducts(@RequestHeader(AUTHORIZATION) String token, @RequestParam("orderId") String orderId) {
+        return productFeign.fetchUnratedProductsFromAnOrder(propertiesCollector.getAuthId(), orderId, jwtTokenUtil.getUsernameFromToken(token));
     }
 
     private String getMerchantEmail(String token) {

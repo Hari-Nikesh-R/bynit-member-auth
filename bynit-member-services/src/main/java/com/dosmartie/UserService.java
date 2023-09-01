@@ -9,5 +9,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface UserService {
     ResponseEntity<BaseResponse<AuthResponse>> signInUser(AuthRequest authRequest);
+//    ResponseEntity<BaseResponse<AuthResponse>> logout(String token);
     ResponseEntity<BaseResponse<AuthResponse>> getRefreshToken(HttpServletRequest request);
 }
