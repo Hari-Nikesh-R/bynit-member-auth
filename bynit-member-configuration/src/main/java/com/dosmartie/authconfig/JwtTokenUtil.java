@@ -1,6 +1,5 @@
 package com.dosmartie.authconfig;
 
-import com.dosmartie.JwtTokenManagerRepository;
 import com.dosmartie.entity.JwtTokenManager;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +42,6 @@ public class JwtTokenUtil implements Serializable {
     public void setRefreshExpirationDateInMs(int refreshExpirationDateInMs) {
         this.refreshExpirationDateInMs = refreshExpirationDateInMs;
     }
-
-    @Autowired
-    private JwtTokenManagerRepository jwtTokenManagerRepository;
 
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {
