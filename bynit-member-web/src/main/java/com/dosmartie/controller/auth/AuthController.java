@@ -8,6 +8,7 @@ import com.dosmartie.request.MerchantRequest;
 import com.dosmartie.response.AuthResponse;
 import com.dosmartie.response.BaseResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

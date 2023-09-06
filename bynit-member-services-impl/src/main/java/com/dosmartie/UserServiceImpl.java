@@ -1,7 +1,6 @@
 package com.dosmartie;
 
 import com.dosmartie.authconfig.JwtTokenUtil;
-import com.dosmartie.entity.JwtTokenManager;
 import com.dosmartie.helper.ResponseMessage;
 import com.dosmartie.request.AuthRequest;
 import com.dosmartie.response.AuthResponse;
@@ -10,8 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.impl.DefaultClaims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,7 +21,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -35,20 +34,19 @@ public class UserServiceImpl implements UserService {
 
     private final JwtTokenUtil jwtTokenUtil;
 
+    private final RedisTemplate<String, String> redisTemplate;
+
     private final UserDetailsService userDetailsService;
 
-    private final JwtTokenManagerRepository jwtTokenManagerRepository;
-    private final RedisTemplate<String, String> redisTemplate;
 
     private final ResponseMessage<AuthResponse> responseMessage;
 
     private final ObjectMapper mapper;
 
-    public UserServiceImpl(AuthenticationProvider authenticationProvider, JwtTokenUtil jwtTokenUtil, UserDetailsService userDetailsService, JwtTokenManagerRepository jwtTokenManagerRepository, RedisTemplate<String, String> redisTemplate, ResponseMessage<AuthResponse> responseMessage, ObjectMapper mapper) {
+    public UserServiceImpl(AuthenticationProvider authenticationProvider, JwtTokenUtil jwtTokenUtil, UserDetailsService userDetailsService, RedisTemplate<String, String> redisTemplate, ResponseMessage<AuthResponse> responseMessage, ObjectMapper mapper) {
         this.authenticationProvider = authenticationProvider;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userDetailsService = userDetailsService;
-        this.jwtTokenManagerRepository = jwtTokenManagerRepository;
         this.redisTemplate = redisTemplate;
         this.responseMessage = responseMessage;
         this.mapper = mapper;
@@ -62,14 +60,11 @@ public class UserServiceImpl implements UserService {
             System.out.println(auth);
             final UserDetails userDetails = userDetailsService
                     .loadUserByUsername(auth);
-            String uuid = generateUUID();
-            redisTemplate.opsForValue().set(uuid, jwtTokenUtil.generateToken(userDetails));
-            redisTemplate.expire(uuid, 1, TimeUnit.DAYS);
-            return ResponseEntity.ok(responseMessage.setSuccessResponse("Authenticated", new AuthResponse(uuid)));
+            return ResponseEntity.ok(responseMessage.setSuccessResponse("Authenticated", null));
         }
         catch (Exception exception) {
             log.error("Invalid user credential");
-            return ResponseEntity.ok(responseMessage.setUnauthorizedResponse("Not Authenticated", exception));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMessage.setUnauthorizedResponse("Not Authenticated", exception));
         }
     }
 

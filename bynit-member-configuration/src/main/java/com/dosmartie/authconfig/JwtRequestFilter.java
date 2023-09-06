@@ -1,8 +1,7 @@
 package com.dosmartie.authconfig;
 
-import com.dosmartie.JwtTokenManagerRepository;
+
 import com.dosmartie.TokenExpiredException;
-import com.dosmartie.entity.JwtTokenManager;
 import com.dosmartie.helper.Utility;
 import com.dosmartie.request.AuthRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -37,8 +35,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     private UserInfoUserDetailsService jwtUserDetailsService;
 
-    @Autowired
-    private JwtTokenManagerRepository jwtTokenManagerRepository;
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
@@ -50,36 +46,36 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String jwtToken = null;
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
-                try {
-                    AuthRequest authRequest = new AuthRequest();
-                    authRequest.setEmail(jwtTokenUtil.getUsernameFromToken(jwtToken));
-                    authRequest.setRole(Utility.roleConvertor(jwtTokenUtil.getRoleFromToken(jwtToken)));
-                    username = objectMapper.writeValueAsString(authRequest);
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Unable to get JWT Token");
-                } catch (ExpiredJwtException e) {
-                    String isRefreshToken = request.getHeader("isRefreshToken");
-                    String requestURL = request.getRequestURL().toString();
-                    // allow for Refresh Token creation if following conditions are true.
-                    if (isRefreshToken != null && isRefreshToken.equals("true") && requestURL.contains("refreshtoken")) {
-                        allowForRefreshToken(e, request);
-                    } else
-                        request.setAttribute("exception", e);
-                    logger.error("JWT token expired");
-                }
-            } else {
-                logger.warn("JWT Token does not begin with Bearer String");
+            try {
+                AuthRequest authRequest = new AuthRequest();
+                authRequest.setEmail(jwtTokenUtil.getUsernameFromToken(jwtToken));
+                authRequest.setRole(Utility.roleConvertor(jwtTokenUtil.getRoleFromToken(jwtToken)));
+                username = objectMapper.writeValueAsString(authRequest);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Unable to get JWT Token");
+            } catch (ExpiredJwtException e) {
+                String isRefreshToken = request.getHeader("isRefreshToken");
+                String requestURL = request.getRequestURL().toString();
+                // allow for Refresh Token creation if following conditions are true.
+                if (isRefreshToken != null && isRefreshToken.equals("true") && requestURL.contains("refreshtoken")) {
+                    allowForRefreshToken(e, request);
+                } else
+                    request.setAttribute("exception", e);
+                logger.error("JWT token expired");
             }
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-                if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    usernamePasswordAuthenticationToken
-                            .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                }
+        } else {
+            logger.warn("JWT Token does not begin with Bearer String");
+        }
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
+            if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                usernamePasswordAuthenticationToken
+                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             }
+        }
         filterChain.doFilter(request, response);
 
     }
