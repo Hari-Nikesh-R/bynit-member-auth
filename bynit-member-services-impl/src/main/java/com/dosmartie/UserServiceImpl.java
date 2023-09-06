@@ -10,6 +10,8 @@ import io.jsonwebtoken.impl.DefaultClaims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -58,14 +60,11 @@ public class UserServiceImpl implements UserService {
             System.out.println(auth);
             final UserDetails userDetails = userDetailsService
                     .loadUserByUsername(auth);
-            String uuid = generateUUID();
-            redisTemplate.opsForValue().set(uuid, jwtTokenUtil.generateToken(userDetails));
-            redisTemplate.expire(uuid, 1, TimeUnit.HOURS);
-            return ResponseEntity.ok(responseMessage.setSuccessResponse("Authenticated", new AuthResponse(uuid)));
+            return ResponseEntity.ok(responseMessage.setSuccessResponse("Authenticated", null));
         }
         catch (Exception exception) {
             log.error("Invalid user credential");
-            return ResponseEntity.ok(responseMessage.setUnauthorizedResponse("Not Authenticated", exception));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMessage.setUnauthorizedResponse("Not Authenticated", exception));
         }
     }
 
